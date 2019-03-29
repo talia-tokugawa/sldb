@@ -44,7 +44,7 @@ Typically speaking, this folder should go in the /www/ or /public_html/ folder (
 
 ### Step 4: Install the table
 
-Visit http://www.example.com/sldb/install to install the table on the database. You should get a confirmation.
+Visit http://www.example.com/sldb/index.php/install to install the table on the database. You should get a confirmation.
 
 ## Storage
 
