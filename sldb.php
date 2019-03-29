@@ -11,8 +11,7 @@ class sldbRequest {
 
   function __construct($db_host, $db_user, $db_pass, $db_name, $table) {
     require_once('config.php');
-    $this->connection = mysql_connect($db_host, $db_user, $db_pass) or die ('ERROR: CANNOT CONNECT TO DATABASE.');
-    mysql_select_db($db_name) or die('ERROR: CANNOT SELECT DATABASE.');
+    $this->connection = mysqli_connect($db_host, $db_user, $db_pass, $db_name) or die ('ERROR: CANNOT CONNECT TO DATABASE.');
     $this->table = $table;
   }
 
@@ -34,7 +33,7 @@ class sldbRequest {
    */
   function createTable() {
     $sql = "CREATE TABLE IF NOT EXISTS `" . $this->table . "` (`uuid` varchar(32) NOT NULL DEFAULT '', `field` varchar(255) NOT NULL DEFAULT '', `value` longtext, `changed` int(11) NOT NULL DEFAULT '0', PRIMARY KEY (`uuid`,`field`)) ENGINE=InnoDB DEFAULT CHARSET=latin1;";
-    $this->result = mysql_query($sql) or die(mysql_error());
+    $this->result = $this->connection->query($sql) or die(mysqli_error());
     $this->output = "SUCCESS";
   }
 
@@ -53,8 +52,8 @@ class sldbRequest {
   function updateData($uuid, $data, $verbose = FALSE) {
     foreach($data as $key => $value) {
       $sql = "INSERT INTO " . $this->table . " (uuid, field, value, changed) VALUES ('$uuid', '$key', '$value', UNIX_TIMESTAMP(NOW())) ON DUPLICATE KEY UPDATE value = '$value', changed = UNIX_TIMESTAMP(NOW())";
-      $this->result = mysql_query($sql) or die(mysql_error());
-      $this->output = $verbose ? "SUCCESS: " . mysql_affected_rows() : mysql_affected_rows();
+      $this->result = $this->connection->query($sql) or die(mysqli_error());
+      $this->output = $verbose ? "SUCCESS: " . mysqli_affected_rows() : mysqli_affected_rows();
     }
   }
 
@@ -83,8 +82,8 @@ class sldbRequest {
     $sql = "SELECT $columns FROM " . $this->table . " WHERE uuid = '$uuid'";
     $sql .= empty($fields) ? '' : " AND field IN (" . implode(', ', (array)$fields) . ")";
 
-    $this->result = mysql_query($sql) or die(mysql_error());
-    while($record = mysql_fetch_assoc($this->result)) {
+    $this->result = $this->connection->query($sql) or die(mysqli_error());
+    while($record = mysqli_fetch_assoc($this->result)) {
       $record['value'] = $record['value'] == '' ? 'NULL' : $record['value'];
       $this->output[] = implode($separator, $record);
     }
@@ -111,7 +110,7 @@ class sldbRequest {
     $sql = "DELETE FROM " . $this->table . " WHERE uuid = '$uuid'";
     $sql .= empty($fields) ? '' : " AND field IN (" . implode(', ', (array)$fields) . ")";
 
-    $this->result = mysql_query($sql) or die(mysql_error());
-    $this->output = $verbose ? "SUCCESS: " . mysql_affected_rows() : mysql_affected_rows();
+    $this->result = $this->connection->query($sql) or die(mysqli_error());
+    $this->output = $verbose ? "SUCCESS: " . mysqli_affected_rows() : mysqli_affected_rows();
   }
 }
